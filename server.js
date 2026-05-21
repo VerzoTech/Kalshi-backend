@@ -23,6 +23,24 @@ app.use(cors());
 app.use(express.json());
 
 // ════════════════════════════════════════
+// SERVE DASHBOARD AT ROOT
+// ════════════════════════════════════════
+const path = require('path');
+const fs   = require('fs');
+
+app.get('/', (req, res) => {
+  const file = path.join(__dirname, 'public', 'index.html');
+  if (fs.existsSync(file)) {
+    res.sendFile(file);
+  } else {
+    res.status(404).send('Dashboard not found — make sure public/index.html exists');
+  }
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+// ════════════════════════════════════════
 // RSA-PSS SIGNING (Kalshi auth method)
 // ════════════════════════════════════════
 function signRequest(method, path) {
