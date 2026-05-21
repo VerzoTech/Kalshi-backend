@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Kalshi BTC Signal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+/* ─── TOKENS ─── */
+:root {
+  --navy:       #0b0e1a;
+  --navy2:      #0f1221;
+  --navy3:      #141829;
+  --card:       #131726;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.12);
+  --green:      #00d084;
+  --green-dim:  rgba(0,208,132,0.13);
+  --green-glow: rgba(0,208,132,0.28);
+  --red:        #ff4466;
+  --red-dim:    rgba(255,68,102,0.13);
+  --red-glow:   rgba(255,68,102,0.28);
+  --blue:       #4c8bff;
+  --blue-dim:   rgba(76,139,255,0.13);
+  --amber:      #f5a623;
+  --amber-dim:  rgba(245,166,35,0.13);
+  --text-1:     #f0f2f8;
+  --text-2:     #8b93a8;
+  --text-3:     #4a5268;
+  --ui:         'Syne', sans-serif;
+  --mono:       'JetBrains Mono', monospace;
+  --r:          10px;
+  --r-sm:       6px;
+  --sidebar-w:  220px;
+  --tab-h:      62px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--navy);
+  color: var(--text-1);
+  font-family: var(--ui);
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══════════════════════════════════════════
+   MOBILE TOP BAR
+══════════════════════════════════════════ */
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 54px;
+  background: var(--navy2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+.mob-logo {
+  display: flex; align-items: center; gap: 8px;
+}
+.mob-logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--blue), #7b5ea7);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #fff;
+}
+.mob-logo-text { font-size: 14px; font-weight: 700; }
+.mob-price-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--navy3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+}
+.mob-price { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.mob-chg   { font-family: var(--mono); font-size: 10px; }
+.mob-clock { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+
+/* ══════════════════════════════════════════
+   SHELL (sidebar + main)
+══════════════════════════════════════════ */
+.shell {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR (desktop)
+══════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--navy2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 22px 18px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--blue), #7b5ea7);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: #fff;
+}
+.logo-text  { font-size: 14px; font-weight: 700; }
+.logo-sub   { font-size: 9px; color: var(--text-3); letter-spacing: 1px; font-family: var(--mono); margin-top: 1px; }
+.sb-nav     { flex: 1; padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; }
+.sb-sec     { font-size: 9px; letter-spacing: 2px; color: var(--text-3); padding: 10px 8px 5px; font-family: var(--mono); text-transform: uppercase; }
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; border-radius: var(--r-sm);
+  color: var(--text-2); font-size: 13px; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.sb-item:hover { background: rgba(255,255,255,0.04); color: var(--text-1); }
+.sb-item.active { background: var(--blue-dim); color: var(--blue); }
+.sb-item .ico { font-size: 14px; width: 18px; text-align: center; }
+.sb-badge { margin-left: auto; font-size: 9px; background: var(--green-dim); color: var(--green); padding: 2px 6px; border-radius: 20px; font-family: var(--mono); }
+.sb-bottom { padding: 14px 12px; border-top: 1px solid var(--border); }
+.sb-stat { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; }
+.sb-stat .sl { font-size: 9px; color: var(--text-3); font-family: var(--mono); }
+.sb-stat .sv { font-size: 12px; font-weight: 600; font-family: var(--mono); }
+.live-pill { display: flex; align-items: center; gap: 6px; font-size: 9px; color: var(--green); font-family: var(--mono); letter-spacing: 1px; padding-top: 8px; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot {
+  0%   { box-shadow: 0 0 0 0 var(--green-glow); }
+  70%  { box-shadow: 0 0 0 7px rgba(0,208,132,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,208,132,0); }
+}
+
+/* ══════════════════════════════════════════
+   MAIN SCROLLABLE AREA
+══════════════════════════════════════════ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* desktop topbar */
+.desk-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 58px;
+  border-bottom: 1px solid var(--border);
+  background: var(--navy2);
+  flex-shrink: 0;
+}
+.desk-topbar-l { display: flex; align-items: center; gap: 6px; }
+.page-title  { font-size: 15px; font-weight: 700; }
+.page-candle { font-size: 10px; color: var(--text-3); font-family: var(--mono); margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--border2); }
+.desk-topbar-r { display: flex; align-items: center; gap: 12px; }
+.desk-price-pill { display: flex; align-items: center; gap: 8px; background: var(--navy3); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; }
+.desk-price-pill .pr { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.desk-price-pill .ch { font-family: var(--mono); font-size: 11px; }
+.desk-clock { font-family: var(--mono); font-size: 12px; color: var(--text-2); background: var(--navy3); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); }
+
+/* scroll area */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-area::-webkit-scrollbar { width: 3px; }
+.scroll-area::-webkit-scrollbar-track { background: transparent; }
+.scroll-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.content {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* section label */
+.sec-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); font-family: var(--mono); text-transform: uppercase; margin-bottom: 12px; }
+
+/* ══════════════════════════════════════════
+   MOBILE STICKY VERDICT STRIP
+══════════════════════════════════════════ */
+.mob-verdict-strip {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  padding: 10px 16px;
+  background: var(--navy2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+}
+.mvs-arrow { font-size: 22px; }
+.mvs-arrow.bull { color: var(--green); }
+.mvs-arrow.bear { color: var(--red); }
+.mvs-arrow.wait { color: var(--text-3); }
+.mvs-label { font-size: 14px; font-weight: 700; }
+.mvs-label.bull { color: var(--green); }
+.mvs-label.bear { color: var(--red); }
+.mvs-label.wait { color: var(--text-3); }
+.mvs-conf { font-size: 10px; color: var(--text-3); font-family: var(--mono); margin-left: 2px; }
+.mvs-timer { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.mvs-timer-val { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--amber); }
+.mvs-timer-val.urgent { color: var(--red); animation: blink 0.5s step-end infinite; }
+@keyframes blink { 50% { opacity: 0.35; } }
+.mvs-timer-label { font-size: 8px; color: var(--text-3); font-family: var(--mono); letter-spacing: 1px; }
+
+/* ══════════════════════════════════════════
+   KPI STRIP
+══════════════════════════════════════════ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative; overflow: hidden;
+}
+.kpi-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--border);
+}
+.kpi-card.green::after { background: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+.kpi-card.red::after   { background: var(--red);   box-shadow: 0 0 10px var(--red-glow); }
+.kpi-card.blue::after  { background: var(--blue); }
+.kpi-card.amber::after { background: var(--amber); }
+.kpi-top { display: flex; justify-content: space-between; align-items: center; }
+.kpi-lbl { font-size: 9px; letter-spacing: 1.5px; color: var(--text-3); font-family: var(--mono); text-transform: uppercase; }
+.kpi-ico { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.kpi-ico.green { background: var(--green-dim); }
+.kpi-ico.red   { background: var(--red-dim); }
+.kpi-ico.blue  { background: var(--blue-dim); }
+.kpi-ico.amber { background: var(--amber-dim); }
+.kpi-val { font-size: 26px; font-weight: 800; font-family: var(--mono); line-height: 1; }
+.kpi-val.green { color: var(--green); }
+.kpi-val.red   { color: var(--red); }
+.kpi-foot { font-size: 9px; color: var(--text-3); font-family: var(--mono); }
+
+/* ══════════════════════════════════════════
+   MAIN ROW (verdict + right)
+══════════════════════════════════════════ */
+.main-row {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
+  align-items: start;
+}
+.left-col  { display: flex; flex-direction: column; gap: 14px; }
+.right-col { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── VERDICT CARD ── */
+.verdict-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.vc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+}
+.vc-header-left { display: flex; align-items: center; gap: 10px; }
+.vc-title { font-size: 13px; font-weight: 700; }
+.v-pill {
+  font-size: 9px; font-weight: 700; letter-spacing: 2px;
+  padding: 3px 10px; border-radius: 20px; font-family: var(--mono); text-transform: uppercase;
+}
+.v-pill.bull { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,208,132,0.3); }
+.v-pill.bear { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,68,102,0.3); }
+.v-pill.wait { background: rgba(255,255,255,0.04); color: var(--text-3); border: 1px solid var(--border); }
+.vc-sub { font-size: 10px; color: var(--text-3); font-family: var(--mono); }
+
+.vc-body { padding: 24px 20px; display: flex; align-items: center; gap: 24px; }
+
+.v-big {
+  flex-shrink: 0; width: 140px; height: 140px; border-radius: var(--r);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  border: 2px solid var(--border); transition: all 0.5s;
+}
+.v-big.bull { border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 40px var(--green-glow), inset 0 0 30px rgba(0,208,132,0.05); }
+.v-big.bear { border-color: var(--red);   background: var(--red-dim);   box-shadow: 0 0 40px var(--red-glow),   inset 0 0 30px rgba(255,68,102,0.05); }
+.v-big.wait { border-color: var(--border2); background: rgba(255,255,255,0.02); }
+.v-arrow { font-size: 46px; line-height: 1; transition: color 0.4s; }
+.v-arrow.bull { color: var(--green); }
+.v-arrow.bear { color: var(--red); }
+.v-arrow.wait { color: var(--text-3); }
+.v-lbl { font-size: 11px; font-weight: 700; letter-spacing: 3px; font-family: var(--mono); transition: color 0.4s; }
+.v-lbl.bull { color: var(--green); }
+.v-lbl.bear { color: var(--red); }
+.v-lbl.wait { color: var(--text-3); }
+
+.v-right { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+.v-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.v-meta-item .vmi-label { font-size: 9px; color: var(--text-3); font-family: var(--mono); letter-spacing: 1px; }
+.v-meta-item .vmi-val   { font-size: 16px; font-weight: 700; font-family: var(--mono); margin-top: 3px; }
+.vmi-val.bull { color: var(--green); }
+.vmi-val.bear { color: var(--red); }
+
+.conf-row { display: flex; flex-direction: column; gap: 5px; }
+.conf-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-3); font-family: var(--mono); }
+.conf-track { height: 7px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1), background 0.4s; }
+
+.v-footer { display: flex; gap: 10px; align-items: stretch; }
+.v-timer-box {
+  flex: 1; background: var(--navy3); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 11px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.v-timer-label { font-size: 9px; color: var(--text-3); font-family: var(--mono); letter-spacing: 1px; }
+.v-timer-val   { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--amber); transition: color 0.3s; }
+.v-timer-val.urgent { color: var(--red); animation: blink 0.6s step-end infinite; }
+.bet-link {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 11px 18px; background: var(--blue-dim);
+  border: 1px solid rgba(76,139,255,0.35); border-radius: var(--r-sm);
+  color: var(--blue); font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
+  transition: all 0.2s; white-space: nowrap;
+}
+.bet-link:hover { background: rgba(76,139,255,0.22); box-shadow: 0 0 18px rgba(76,139,255,0.2); }
+
+/* ── SIGNALS TABLE (desktop) ── */
+.sig-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+}
+.sig-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+}
+.sig-card-title { font-size: 13px; font-weight: 700; }
+.sig-card-sub   { font-size: 9px; color: var(--text-3); font-family: var(--mono); }
+
+.sig-table { width: 100%; border-collapse: collapse; }
+.sig-table thead tr { background: var(--navy3); }
+.sig-table th { padding: 9px 16px; text-align: left; font-size: 8px; font-weight: 600; letter-spacing: 2px; color: var(--text-3); font-family: var(--mono); text-transform: uppercase; }
+.sig-table td { padding: 12px 16px; font-size: 12px; border-bottom: 1px solid var(--border); }
+.sig-table tbody tr:last-child td { border-bottom: none; }
+.sig-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.sig-name  { font-weight: 600; font-size: 12px; }
+.sig-period{ font-size: 9px; color: var(--text-3); font-family: var(--mono); }
+.sig-val   { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.s-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 9px; border-radius: 20px; font-family: var(--mono); white-space: nowrap;
+}
+.s-badge.bull { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,208,132,0.25); }
+.s-badge.bear { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,68,102,0.25); }
+.s-badge.neutral { background: rgba(255,255,255,0.04); color: var(--text-3); border: 1px solid var(--border); }
+.s-bar-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; width: 90px; }
+.s-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+.s-dir { font-size: 10px; font-weight: 700; font-family: var(--mono); }
+
+/* ── SIGNALS MOBILE CARDS ── */
+.sig-cards-mobile {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+.sig-mob-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 13px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.sig-mob-card.bull { border-color: rgba(0,208,132,0.25); }
+.sig-mob-card.bear { border-color: rgba(255,68,102,0.25); }
+.sig-mob-left { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.sig-mob-name  { font-size: 12px; font-weight: 700; }
+.sig-mob-signal{ font-size: 10px; color: var(--text-3); font-family: var(--mono); }
+.sig-mob-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.sig-mob-val   { font-family: var(--mono); font-size: 14px; font-weight: 700; }
+.sig-mob-bar   { width: 60px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.sig-mob-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+/* ── LOG BET CARD ── */
+.log-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+}
+.log-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+}
+.log-card-head .lct { font-size: 13px; font-weight: 700; }
+.log-card-head .lcs { font-size: 9px; color: var(--text-3); font-family: var(--mono); }
+.log-card-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+.size-row2 { display: flex; align-items: center; gap: 8px; }
+.size-label2 { font-size: 10px; color: var(--text-3); font-family: var(--mono); white-space: nowrap; }
+.size-inp {
+  flex: 1; background: var(--navy3); border: 1px solid var(--border2);
+  border-radius: var(--r-sm); color: var(--text-1);
+  font-family: var(--mono); font-size: 15px; font-weight: 600;
+  padding: 9px 12px; outline: none; transition: border-color 0.2s;
+  /* bigger tap target */
+  min-height: 44px;
+}
+.size-inp:focus { border-color: var(--blue); }
+
+.bet-grid2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.b-btn {
+  padding: 14px 8px; border-radius: var(--r-sm);
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+  transition: all 0.15s; border: 1px solid transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 58px; /* generous touch target */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.b-btn .bi { font-size: 16px; }
+.b-btn .bl { font-size: 8px; opacity: 0.7; }
+.bw  { background: var(--green-dim); border-color: rgba(0,208,132,0.4); color: var(--green); }
+.bw:active  { background: rgba(0,208,132,0.22); }
+.bl2 { background: rgba(0,208,132,0.04); border-color: rgba(0,208,132,0.15); color: rgba(0,208,132,0.45); }
+.bl2:active { background: var(--green-dim); }
+.rw  { background: var(--red-dim); border-color: rgba(255,68,102,0.4); color: var(--red); }
+.rw:active  { background: rgba(255,68,102,0.22); }
+.rl  { background: rgba(255,68,102,0.04); border-color: rgba(255,68,102,0.15); color: rgba(255,68,102,0.45); }
+.rl:active  { background: var(--red-dim); }
+
+/* ── HISTORY ── */
+.hist-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.hist-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+}
+.hist-head .ht { font-size: 13px; font-weight: 700; }
+.clear-btn {
+  font-size: 9px; font-family: var(--mono); color: var(--text-3);
+  background: none; border: none; cursor: pointer; letter-spacing: 1px;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 4px;
+  transition: color 0.2s; -webkit-tap-highlight-color: transparent;
+}
+.clear-btn:hover { color: var(--red); }
+.hist-scroll { max-height: 280px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.hist-scroll::-webkit-scrollbar { width: 3px; }
+.hist-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.h-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; border-bottom: 1px solid var(--border); font-size: 11px;
+  animation: row-in 0.2s ease;
+}
+@keyframes row-in { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
+.h-row:last-child { border-bottom: none; }
+.h-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.h-time { color: var(--text-3); font-family: var(--mono); font-size: 9px; min-width: 40px; }
+.h-badge { font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 12px; font-family: var(--mono); }
+.h-badge.bull { background: var(--green-dim); color: var(--green); }
+.h-badge.bear { background: var(--red-dim);   color: var(--red); }
+.h-out  { font-size: 9px; color: var(--text-3); font-family: var(--mono); }
+.h-amt  { margin-left: auto; font-family: var(--mono); font-size: 12px; font-weight: 700; }
+.h-amt.pos { color: var(--green); }
+.h-amt.neg { color: var(--red); }
+.hist-empty { padding: 28px; text-align: center; font-size: 10px; color: var(--text-3); font-family: var(--mono); }
+
+/* ══════════════════════════════════════════
+   MOBILE BOTTOM TAB BAR
+══════════════════════════════════════════ */
+.mob-tab-bar {
+  display: none;
+  height: var(--tab-h);
+  background: var(--navy2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+.mob-tabs {
+  display: flex;
+  height: 100%;
+}
+.mob-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer; color: var(--text-3);
+  font-size: 9px; font-family: var(--mono); letter-spacing: 1px;
+  text-transform: uppercase; transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  text-decoration: none;
+}
+.mob-tab.active { color: var(--blue); }
+.mob-tab .tab-ico { font-size: 20px; line-height: 1; }
+
+/* ══════════════════════════════════════════
+   MOBILE TABS — PANEL SWITCHING
+══════════════════════════════════════════ */
+.tab-panel { display: flex; flex-direction: column; gap: 14px; }
+.tab-panel.hidden { display: none; }
+
+/* ── MISC ── */
+.text-green { color: var(--green); }
+.text-red   { color: var(--red); }
+.text-amber { color: var(--amber); }
+.text-muted { color: var(--text-3); }
+.mono       { font-family: var(--mono); }
+
+@keyframes pop {
+  0%  { transform: scale(0.95); opacity: 0; }
+  60% { transform: scale(1.02); }
+  100%{ transform: scale(1); opacity: 1; }
+}
+.pop { animation: pop 0.35s cubic-bezier(0.16,1,0.3,1); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════════════════ */
+
+/* Tablet: collapse 4-col KPI to 2×2 */
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .main-row { grid-template-columns: 1fr; }
+  .right-col { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+/* Mobile: full redesign */
+@media (max-width: 768px) {
+  body { overflow: hidden; }
+
+  /* show mobile chrome, hide desktop chrome */
+  .mobile-topbar { display: flex; }
+  .sidebar       { display: none; }
+  .desk-topbar   { display: none; }
+  .mob-verdict-strip { display: flex; }
+  .mob-tab-bar   { display: block; }
+
+  /* full-height scroll area */
+  .shell { overflow: hidden; }
+  .main  { overflow: hidden; height: 100%; }
+  .scroll-area { padding-bottom: calc(var(--tab-h) + 8px); }
+
+  /* content padding */
+  .content { padding: 14px 14px; gap: 14px; }
+
+  /* KPI: 2x2 grid */
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-val  { font-size: 22px; }
+
+  /* main row: single col */
+  .main-row { grid-template-columns: 1fr; }
+
+  /* verdict: vertical stack */
+  .vc-body { flex-direction: column; align-items: stretch; gap: 16px; }
+  .v-big { width: 100%; height: 80px; flex-direction: row; gap: 14px; }
+  .v-arrow { font-size: 36px; }
+  .v-lbl   { font-size: 14px; letter-spacing: 4px; }
+  .v-meta-grid { grid-template-columns: 1fr 1fr; }
+  .vc-sub { display: none; }
+  .v-footer { flex-direction: column; gap: 8px; }
+  .v-timer-box { padding: 10px 14px; }
+
+  /* signals: hide table, show cards */
+  .sig-table-wrap   { display: none; }
+  .sig-cards-mobile { display: flex; }
+
+  /* right col: single col */
+  .right-col { display: flex; flex-direction: column; }
+
+  /* larger bet buttons */
+  .b-btn { min-height: 64px; font-size: 11px; }
+  .bet-grid2 { gap: 10px; }
+}
+
+/* small phones */
+@media (max-width: 390px) {
+  .kpi-val { font-size: 19px; }
+  .kpi-card { padding: 13px 14px; }
+  .content { padding: 12px; gap: 12px; }
+}
+
+/* Safe area for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mob-tab-bar { padding-bottom: env(safe-area-inset-bottom); height: calc(var(--tab-h) + env(safe-area-inset-bottom)); }
+}
+</style>
+</head>
+<body>
+
+<!-- ════ MOBILE TOP BAR ════ -->
+<div class="mobile-topbar">
+  <div class="mob-logo">
+    <div class="mob-logo-icon">K</div>
+    <div class="mob-logo-text">Kalshi Signal</div>
+  </div>
+  <div class="mob-price-pill">
+    <span class="mob-price" id="mob-price">$—</span>
+    <span class="mob-chg"   id="mob-chg">+0%</span>
+  </div>
+  <span class="mob-clock" id="mob-clock">--:--</span>
+</div>
+
+<!-- ════ SHELL ════ -->
+<div class="shell">
+
+  <!-- DESKTOP SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">K</div>
+        <div><div class="logo-text">Kalshi</div><div class="logo-sub">SIGNAL DESK</div></div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Trading</div>
+      <div class="sb-item active"><span class="ico">📊</span>Signal Dashboard<span class="sb-badge">LIVE</span></div>
+      <a href="https://kalshi.com/markets?category=crypto" target="_blank" class="sb-item"><span class="ico">⚡</span>Place Bet</a>
+      <div class="sb-sec">Analysis</div>
+      <div class="sb-item"><span class="ico">₿</span>BTC Markets</div>
+      <div class="sb-item"><span class="ico">📈</span>Signal Log</div>
+      <div class="sb-sec">Account</div>
+      <a href="https://kalshi.com/settings" target="_blank" class="sb-item"><span class="ico">⚙️</span>Settings</a>
+    </nav>
+    <div class="sb-bottom">
+      <div class="sb-stat"><span class="sl">SESSION P&L</span><span class="sv" id="sb-pnl" style="color:var(--text-3)">$0.00</span></div>
+      <div class="sb-stat"><span class="sl">WIN RATE</span><span class="sv" id="sb-wr">—</span></div>
+      <div class="sb-stat"><span class="sl">TOTAL BETS</span><span class="sv" id="sb-bets">0</span></div>
+      <div class="live-pill"><div class="live-dot"></div>BINANCE · LIVE</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DESKTOP TOPBAR -->
+    <div class="desk-topbar">
+      <div class="desk-topbar-l">
+        <span class="page-title">BTC/USD · 15-Minute Signal</span>
+        <span class="page-candle" id="desk-candle">Candle #—</span>
+      </div>
+      <div class="desk-topbar-r">
+        <div class="desk-price-pill">
+          <span style="font-size:10px;color:var(--text-3);font-family:var(--mono)">BTC</span>
+          <span class="pr" id="desk-price">$—</span>
+          <span class="ch" id="desk-chg">+0.00%</span>
+        </div>
+        <div class="desk-clock" id="desk-clock">--:--:--</div>
+      </div>
+    </div>
+
+    <!-- MOBILE STICKY VERDICT STRIP -->
+    <div class="mob-verdict-strip" id="mvs">
+      <div class="mvs-arrow wait" id="mvs-arrow">◆</div>
+      <div>
+        <div class="mvs-label wait" id="mvs-label">SCANNING…</div>
+        <div class="mvs-conf" id="mvs-conf">loading signals</div>
+      </div>
+      <div class="mvs-timer">
+        <div class="mvs-timer-val" id="mvs-timer">—:——</div>
+        <div class="mvs-timer-label">NEXT CANDLE</div>
+      </div>
+    </div>
+
+    <!-- SCROLL AREA -->
+    <div class="scroll-area" id="scroll-area">
+      <div class="content">
+
+        <!-- ── TAB PANELS (mobile switches; desktop shows all) ── -->
+
+        <!-- PANEL: SIGNAL -->
+        <div class="tab-panel" id="panel-signal">
+
+          <!-- KPI strip -->
+          <div>
+            <div class="sec-label">Session Overview</div>
+            <div class="kpi-grid">
+              <div class="kpi-card" id="kpi-pnl-card">
+                <div class="kpi-top"><span class="kpi-lbl">Net P&amp;L</span><div class="kpi-ico green">💰</div></div>
+                <div class="kpi-val" id="kpi-pnl" style="color:var(--text-3)">$0.00</div>
+                <div class="kpi-foot" id="kpi-pnl-sub">No trades yet</div>
+              </div>
+              <div class="kpi-card blue">
+                <div class="kpi-top"><span class="kpi-lbl">Win Rate</span><div class="kpi-ico blue">🎯</div></div>
+                <div class="kpi-val mono" id="kpi-wr" style="color:var(--text-3)">—</div>
+                <div class="kpi-foot" id="kpi-wr-sub">0 wins · 0 losses</div>
+              </div>
+              <div class="kpi-card amber">
+                <div class="kpi-top"><span class="kpi-lbl">Total Bets</span><div class="kpi-ico amber">📋</div></div>
+                <div class="kpi-val mono" id="kpi-bets" style="color:var(--text-1)">0</div>
+                <div class="kpi-foot" id="kpi-bets-sub">Session started</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-top"><span class="kpi-lbl">Avg W / L</span><div class="kpi-ico green">⚖️</div></div>
+                <div style="display:flex;gap:8px;align-items:baseline">
+                  <div class="kpi-val mono text-green" id="kpi-avgw" style="font-size:18px">$0</div>
+                  <div style="font-size:11px;color:var(--text-3);font-family:var(--mono)">/</div>
+                  <div class="kpi-val mono text-red"   id="kpi-avgl" style="font-size:18px">$0</div>
+                </div>
+                <div class="kpi-foot">Avg win / avg loss</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main row -->
+          <div class="main-row">
+
+            <!-- LEFT -->
+            <div class="left-col">
+
+              <!-- Verdict card -->
+              <div class="verdict-card">
+                <div class="vc-header">
+                  <div class="vc-header-left">
+                    <span class="vc-title">Current Signal</span>
+                    <span class="v-pill wait" id="v-pill">SCANNING</span>
+                  </div>
+                  <span class="vc-sub">15M · Auto-updates</span>
+                </div>
+                <div class="vc-body">
+                  <div class="v-big wait" id="v-big">
+                    <div class="v-arrow wait" id="v-arrow">◆</div>
+                    <div class="v-lbl  wait" id="v-lbl">WAIT</div>
+                  </div>
+                  <div class="v-right">
+                    <div class="v-meta-grid">
+                      <div class="v-meta-item">
+                        <div class="vmi-label">RECOMMENDED</div>
+                        <div class="vmi-val" id="v-action">—</div>
+                      </div>
+                      <div class="v-meta-item">
+                        <div class="vmi-label">KALSHI SIDE</div>
+                        <div class="vmi-val mono" id="v-side" style="font-size:14px">—</div>
+                      </div>
+                      <div class="v-meta-item">
+                        <div class="vmi-label">SIGNALS AGREE</div>
+                        <div class="vmi-val mono" id="v-sigs" style="font-size:14px">—</div>
+                      </div>
+                      <div class="v-meta-item">
+                        <div class="vmi-label">15M HIGH / LOW</div>
+                        <div style="display:flex;gap:6px;align-items:center;margin-top:3px">
+                          <span class="mono text-green" id="v-high" style="font-size:13px;font-weight:700">—</span>
+                          <span class="text-muted mono" style="font-size:10px">/</span>
+                          <span class="mono text-red"   id="v-low"  style="font-size:13px;font-weight:700">—</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="conf-row">
+                      <div class="conf-labels"><span>SIGNAL CONFIDENCE</span><span id="v-conf-pct">0%</span></div>
+                      <div class="conf-track"><div class="conf-fill" id="v-conf-bar" style="width:0%;background:var(--text-3)"></div></div>
+                    </div>
+                    <div class="v-footer">
+                      <div class="v-timer-box">
+                        <span class="v-timer-label">NEXT CANDLE IN</span>
+                        <span class="v-timer-val" id="v-timer">—:——</span>
+                      </div>
+                      <a href="https://kalshi.com/markets?category=crypto&search=bitcoin+price" target="_blank" class="bet-link">↗ BET NOW</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Signals TABLE (desktop) -->
+              <div class="sig-card sig-table-wrap">
+                <div class="sig-card-header">
+                  <span class="sig-card-title">Signal Breakdown</span>
+                  <span class="sig-card-sub">6 INDICATORS · BTC 15M</span>
+                </div>
+                <table class="sig-table">
+                  <thead><tr>
+                    <th>Indicator</th><th>Value</th><th>Signal</th><th>Strength</th><th>Dir</th>
+                  </tr></thead>
+                  <tbody id="sig-tbody">
+                    <tr><td colspan="5" style="text-align:center;color:var(--text-3);font-family:var(--mono);font-size:11px;padding:24px">Loading…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Signals CARDS (mobile) -->
+              <div class="sig-card" style="overflow:hidden;">
+                <div class="sig-card-header">
+                  <span class="sig-card-title">Signal Breakdown</span>
+                  <span class="sig-card-sub mono" style="font-size:9px" id="sig-score-label">— / 6</span>
+                </div>
+                <div class="sig-cards-mobile" id="sig-mob-list" style="padding:10px 12px 12px;gap:8px;display:none"></div>
+              </div>
+
+            </div><!-- /left-col -->
+
+            <!-- RIGHT -->
+            <div class="right-col">
+
+              <!-- Log bet -->
+              <div class="log-card">
+                <div class="log-card-head"><span class="lct">Log Bet Result</span><span class="lcs">MANUAL ENTRY</span></div>
+                <div class="log-card-body">
+                  <div class="size-row2">
+                    <span class="size-label2">BET $</span>
+                    <input class="size-inp" type="number" id="bet-size" value="25" min="1" step="1" inputmode="decimal"/>
+                  </div>
+                  <div class="bet-grid2">
+                    <button class="b-btn bw"  onclick="logBet('BULL','WIN')"><span class="bi">▲</span><span>BULL WIN</span><span class="bl">+90% profit</span></button>
+                    <button class="b-btn rw"  onclick="logBet('BEAR','WIN')"><span class="bi">▼</span><span>BEAR WIN</span><span class="bl">+90% profit</span></button>
+                    <button class="b-btn bl2" onclick="logBet('BULL','LOSS')"><span class="bi">▲</span><span>BULL LOSS</span><span class="bl">-100% loss</span></button>
+                    <button class="b-btn rl"  onclick="logBet('BEAR','LOSS')"><span class="bi">▼</span><span>BEAR LOSS</span><span class="bl">-100% loss</span></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- History -->
+              <div class="hist-card">
+                <div class="hist-head">
+                  <span class="ht">Bet History</span>
+                  <button class="clear-btn" onclick="clearHistory()">Clear All</button>
+                </div>
+                <div class="hist-scroll" id="hist-body">
+                  <div class="hist-empty">No bets logged yet</div>
+                </div>
+              </div>
+
+            </div><!-- /right-col -->
+          </div><!-- /main-row -->
+
+        </div><!-- /panel-signal -->
+
+        <!-- ── KALSHI LIVE PANEL ── -->
+        <div>
+          <div class="sec-label">Kalshi Live Market Data</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="kalshi-row">
+
+            <!-- Backend connection card -->
+            <div class="log-card" style="grid-column:1/-1">
+              <div class="log-card-head">
+                <span class="lct">Backend Connection</span>
+                <span style="display:flex;align-items:center;gap:6px;">
+                  <div class="live-dot" id="api-dot" style="background:var(--text-3);animation:none"></div>
+                  <span class="lcs" id="api-status-txt">NOT CONNECTED</span>
+                </span>
+              </div>
+              <div class="log-card-body" style="gap:10px;">
+                <div class="size-row2" style="gap:8px;flex-wrap:wrap;">
+                  <span class="size-label2">BACKEND URL</span>
+                  <input class="size-inp" type="text" id="backend-url"
+                    placeholder="https://your-app.railway.app"
+                    style="flex:1;min-width:200px;font-size:12px;letter-spacing:0"
+                    value=""/>
+                  <button onclick="connectBackend()" style="padding:9px 18px;background:var(--blue-dim);border:1px solid rgba(76,139,255,0.4);border-radius:var(--r-sm);color:var(--blue);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;cursor:pointer;white-space:nowrap;transition:all 0.2s;min-height:44px;">
+                    CONNECT
+                  </button>
+                </div>
+                <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);line-height:1.6;">
+                  Paste your Railway/Render backend URL above → click Connect to load live Kalshi market data, YES/NO prices, and your account balance.
+                </div>
+              </div>
+            </div>
+
+            <!-- Current BTC market -->
+            <div class="log-card">
+              <div class="log-card-head"><span class="lct">Active BTC Contract</span><span class="lcs" id="mkt-exp">—</span></div>
+              <div class="log-card-body" style="gap:8px;">
+                <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);letter-spacing:1px;">TICKER</div>
+                <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue)" id="mkt-ticker">—</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+                  <div>
+                    <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);">YES BID / ASK</div>
+                    <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green);margin-top:2px" id="mkt-yes">— / —</div>
+                  </div>
+                  <div>
+                    <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);">NO BID / ASK</div>
+                    <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--red);margin-top:2px" id="mkt-no">— / —</div>
+                  </div>
+                  <div>
+                    <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);">VOLUME</div>
+                    <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text-1);margin-top:2px" id="mkt-vol">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);">OPEN INT.</div>
+                    <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text-1);margin-top:2px" id="mkt-oi">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Account balance -->
+            <div class="log-card">
+              <div class="log-card-head"><span class="lct">Account Balance</span><span class="lcs" id="bal-mode">—</span></div>
+              <div class="log-card-body" style="gap:8px;">
+                <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);letter-spacing:1px;">AVAILABLE</div>
+                <div style="font-family:var(--mono);font-size:28px;font-weight:800;color:var(--text-1);line-height:1" id="bal-amount">$—</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+                  <div>
+                    <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);">OPEN POSITIONS</div>
+                    <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber);margin-top:2px" id="bal-positions">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:9px;color:var(--text-3);font-family:var(--mono);">LAST REFRESH</div>
+                    <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:2px" id="bal-refresh">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="font-size:8px;color:var(--text-3);font-family:var(--mono);text-align:center;padding:4px 0;letter-spacing:1px">
+          FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE · SIGNALS ARE PROBABILISTIC
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /scroll-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ════ MOBILE BOTTOM TAB BAR ════ -->
+<nav class="mob-tab-bar">
+  <div class="mob-tabs">
+    <div class="mob-tab active" id="tab-signal" onclick="switchTab('signal')">
+      <span class="tab-ico">📊</span>
+      <span>Signal</span>
+    </div>
+    <div class="mob-tab" id="tab-bet" onclick="switchTab('bet')">
+      <span class="tab-ico">⚡</span>
+      <span>Log Bet</span>
+    </div>
+    <a href="https://kalshi.com/markets?category=crypto" target="_blank" class="mob-tab">
+      <span class="tab-ico">↗</span>
+      <span>Kalshi</span>
+    </a>
+  </div>
+</nav>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const S = {
+  candles:[], pnl:0, bets:0, wins:0, losses:0,
+  winAmts:[], lossAmts:[],
+  history: JSON.parse(localStorage.getItem('kd2_hist')||'[]'),
+  lastBlock:-1, candleNum:0,
+  verdict:'NEUTRAL', conf:0,
+};
+
+// restore session
+(function restore(){
+  S.history.forEach(h=>{
+    S.bets++;
+    if(h.outcome==='WIN'){S.wins++;S.pnl+=h.profit;S.winAmts.push(h.profit);}
+    else{S.losses++;S.pnl-=h.size;S.lossAmts.push(h.size);}
+  });
+  renderHistory();
+  updateKPIs();
+})();
+
+// ── MOBILE TAB SWITCHING ──
+let activeTab = 'signal';
+function switchTab(tab){
+  activeTab = tab;
+  // update tab highlights
+  document.querySelectorAll('.mob-tab[id]').forEach(t=>{
+    t.classList.toggle('active', t.id==='tab-'+tab);
+  });
+
+  // on mobile, scroll to the right section
+  const isMob = window.innerWidth <= 768;
+  if(!isMob) return;
+
+  if(tab==='signal'){
+    document.getElementById('scroll-area').scrollTo({top:0, behavior:'smooth'});
+  } else if(tab==='bet'){
+    // scroll to log card
+    const lc = document.querySelector('.log-card');
+    if(lc) lc.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+// ══════════════════════════════════════════
+// CLOCK & CANDLE COUNTDOWN
+// ══════════════════════════════════════════
+function tick(){
+  const now = new Date();
+  const hms = now.toTimeString().slice(0,8);
+  const hm  = now.toTimeString().slice(0,5);
+
+  // update all clocks
+  const dc = document.getElementById('desk-clock');
+  if(dc) dc.textContent = hms;
+  const mc = document.getElementById('mob-clock');
+  if(mc) mc.textContent = hm;
+
+  // candle countdown
+  const totalSec = now.getMinutes()*60 + now.getSeconds();
+  const blockSec = totalSec % 900;
+  const rem      = 900 - blockSec;
+  const block    = Math.floor(totalSec/900) + now.getHours()*4;
+  const mm = String(Math.floor(rem/60)).padStart(2,'0');
+  const ss = String(rem%60).padStart(2,'0');
+  const tStr = `${mm}:${ss}`;
+  const urgent = rem <= 120;
+
+  const vt = document.getElementById('v-timer');
+  if(vt){ vt.textContent=tStr; vt.className='v-timer-val'+(urgent?' urgent':''); }
+
+  const mvt = document.getElementById('mvs-timer');
+  if(mvt){ mvt.textContent=tStr; mvt.className='mvs-timer-val'+(urgent?' urgent':''); }
+
+  // new candle?
+  if(block !== S.lastBlock){
+    S.lastBlock = block;
+    S.candleNum++;
+    const dc2 = document.getElementById('desk-candle');
+    if(dc2) dc2.textContent = `Candle #${S.candleNum}`;
+    fetchCandles();
+  }
+}
+setInterval(tick,1000);
+tick();
+
+// ══════════════════════════════════════════
+// FETCH
+// ══════════════════════════════════════════
+async function fetchPrice(){
+  try{
+    const d = await (await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')).json();
+    const p = parseFloat(d.lastPrice);
+    const c = parseFloat(d.priceChangePercent);
+    const pStr = '$'+p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const cStr = (c>=0?'+':'')+c.toFixed(2)+'%';
+    const cCol = c>=0?'var(--green)':'var(--red)';
+
+    // desktop
+    const dp = document.getElementById('desk-price');
+    const dc = document.getElementById('desk-chg');
+    if(dp) dp.textContent=pStr;
+    if(dc){ dc.textContent=cStr; dc.style.color=cCol; }
+
+    // mobile
+    const mp = document.getElementById('mob-price');
+    const mc = document.getElementById('mob-chg');
+    if(mp) mp.textContent=pStr;
+    if(mc){ mc.textContent=cStr; mc.style.color=cCol; }
+  }catch(e){}
+}
+
+async function fetchCandles(){
+  try{
+    const raw = await (await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=15m&limit=100')).json();
+    S.candles = raw.map(c=>({
+      open:parseFloat(c[1]),high:parseFloat(c[2]),
+      low:parseFloat(c[3]),close:parseFloat(c[4]),volume:parseFloat(c[5])
+    }));
+    analyze();
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════
+// INDICATORS
+// ══════════════════════════════════════════
+function ema(arr,p){ const k=2/(p+1); let v=arr[0]; for(let i=1;i<arr.length;i++) v=arr[i]*k+v*(1-k); return v; }
+function rsi(closes,p=14){
+  if(closes.length<p+1) return 50;
+  let g=0,l=0;
+  for(let i=closes.length-p;i<closes.length;i++){const d=closes[i]-closes[i-1];if(d>0)g+=d;else l-=d;}
+  const rs=l===0?100:g/l; return 100-(100/(1+rs));
+}
+function bb(closes,p=20){
+  const sl=closes.slice(-p), m=sl.reduce((a,b)=>a+b,0)/p;
+  const sd=Math.sqrt(sl.reduce((a,b)=>a+(b-m)**2,0)/p);
+  return {pos:Math.min(Math.max((closes.at(-1)-(m-2*sd))/(4*sd),0),1)};
+}
+
+// ══════════════════════════════════════════
+// ANALYZE
+// ══════════════════════════════════════════
+function analyze(){
+  if(S.candles.length<30) return;
+  const closes=S.candles.map(c=>c.close);
+  const vols  =S.candles.map(c=>c.volume);
+  const last  =S.candles.at(-1);
+
+  const R    = rsi(closes);
+  const e9   = ema(closes,9);
+  const e21  = ema(closes,21);
+  const macd = ema(closes,12)-ema(closes,26);
+  const mom  = closes.at(-1)-closes.at(-11);
+  const avgV = vols.slice(-20).reduce((a,b)=>a+b,0)/20;
+  const volR = vols.at(-1)/avgV;
+  const {pos:bbP} = bb(closes);
+
+  const sigs=[
+    {name:'RSI (14)',   period:'14 periods', value:R.toFixed(1),
+     signal:R<38?'OVERSOLD — BUY':R>62?'OVERBOUGHT — SELL':'NEUTRAL ZONE',
+     score:R<38?1:R>62?-1:0, bar:R},
+    {name:'EMA 9/21',  period:'Crossover', value:`${(e9/1000).toFixed(2)}k`,
+     signal:e9>e21?'GOLDEN CROSS':'DEATH CROSS',
+     score:e9>e21?1:-1, bar:e9>e21?75:25},
+    {name:'MACD',      period:'12/26/9', value:(macd>0?'+':'')+macd.toFixed(0),
+     signal:macd>0?'BULLISH MOMENTUM':'BEARISH MOMENTUM',
+     score:macd>0?1:-1, bar:macd>0?65:35},
+    {name:'Momentum',  period:'10 periods', value:(mom>0?'+':'')+mom.toFixed(0),
+     signal:mom>0?'TRENDING UP':'TRENDING DOWN',
+     score:mom>0?1:-1, bar:mom>0?70:30},
+    {name:'Volume',    period:'20-bar avg', value:volR.toFixed(2)+'x',
+     signal:volR>1.25?(mom>0?'SURGE — BULLISH':'SURGE — BEARISH'):'NORMAL',
+     score:volR>1.25?(mom>0?1:-1):0, bar:Math.min(volR*50,100)},
+    {name:'Bollinger', period:'20 / 2σ', value:(bbP*100).toFixed(0)+'%',
+     signal:bbP>0.75?'UPPER BAND — SELL':bbP<0.25?'LOWER BAND — BUY':'MID RANGE',
+     score:bbP>0.75?-1:bbP<0.25?1:0, bar:bbP*100},
+  ];
+
+  const active = sigs.filter(s=>s.score!==0);
+  const bulls  = active.filter(s=>s.score>0).length;
+  const bears  = active.filter(s=>s.score<0).length;
+  const total  = active.length||1;
+  const verdict= bulls>bears?'BULL':bears>bulls?'BEAR':'NEUTRAL';
+  const conf   = Math.round(Math.max(bulls,bears)/total*100);
+  S.verdict=verdict; S.conf=conf;
+
+  // ── UPDATE DESKTOP TABLE ──
+  document.getElementById('sig-tbody').innerHTML = sigs.map(s=>{
+    const cls=s.score>0?'bull':s.score<0?'bear':'neutral';
+    const bc =s.score>0?'var(--green)':s.score<0?'var(--red)':'var(--text-3)';
+    return `<tr>
+      <td><div class="sig-name">${s.name}</div><div class="sig-period">${s.period}</div></td>
+      <td class="sig-val">${s.value}</td>
+      <td><span class="s-badge ${cls}">${s.score>0?'▲':s.score<0?'▼':'◆'} ${s.signal}</span></td>
+      <td><div class="s-bar-track"><div class="s-bar-fill" style="width:${s.bar}%;background:${bc}"></div></div></td>
+      <td><span class="s-dir" style="color:${bc}">${s.score>0?'BULL':s.score<0?'BEAR':'—'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // ── UPDATE MOBILE CARDS ──
+  const mobList = document.getElementById('sig-mob-list');
+  if(mobList){
+    mobList.style.display='flex';
+    mobList.innerHTML = sigs.map(s=>{
+      const cls=s.score>0?'bull':s.score<0?'bear':'';
+      const bc =s.score>0?'var(--green)':s.score<0?'var(--red)':'var(--text-3)';
+      const arrow=s.score>0?'▲':s.score<0?'▼':'◆';
+      return `<div class="sig-mob-card ${cls}">
+        <div class="sig-mob-left">
+          <div class="sig-mob-name">${s.name}</div>
+          <div class="sig-mob-signal">${arrow} ${s.signal}</div>
+        </div>
+        <div class="sig-mob-right">
+          <div class="sig-mob-val" style="color:${bc}">${s.value}</div>
+          <div class="sig-mob-bar"><div class="sig-mob-bar-fill" style="width:${s.bar}%;background:${bc}"></div></div>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('sig-score-label').textContent = `${Math.max(bulls,bears)}/${total} ${verdict}`;
+  }
+
+  // ── UPDATE VERDICT CARD ──
+  const bull = verdict==='BULL', bear=verdict==='BEAR';
+  const vcls = bull?'bull':bear?'bear':'wait';
+
+  const vBig=document.getElementById('v-big');
+  vBig.className=`v-big pop ${vcls}`;
+  setTimeout(()=>vBig.classList.remove('pop'),400);
+  setEl('v-arrow', bull?'▲':bear?'▼':'◆', `v-arrow ${vcls}`);
+  setEl('v-lbl',   bull?'BULLISH':bear?'BEARISH':'NEUTRAL', `v-lbl ${vcls}`);
+
+  const pill=document.getElementById('v-pill');
+  pill.className=`v-pill ${vcls}`;
+  pill.textContent=bull?'▲ BULLISH':bear?'▼ BEARISH':'◆ NEUTRAL';
+
+  const act=document.getElementById('v-action');
+  act.className=`vmi-val ${bull?'bull':bear?'bear':''}`;
+  act.textContent=bull?'BET YES':bear?'BET NO':'SKIP';
+
+  const sid=document.getElementById('v-side');
+  sid.className=`vmi-val mono ${bull?'bull':bear?'bear':''}`;
+  sid.textContent=bull?'YES (Bullish)':bear?'NO (Bearish)':'—';
+
+  setEl('v-sigs', `${Math.max(bulls,bears)} / ${total} agree`);
+  const bar=document.getElementById('v-conf-bar');
+  bar.style.width=conf+'%';
+  bar.style.background=bull?'var(--green)':bear?'var(--red)':'var(--text-3)';
+  document.getElementById('v-conf-pct').textContent=conf+'%';
+  document.getElementById('v-high').textContent='$'+last.high.toFixed(0);
+  document.getElementById('v-low').textContent ='$'+last.low.toFixed(0);
+
+  // ── UPDATE MOBILE VERDICT STRIP ──
+  setEl('mvs-arrow', bull?'▲':bear?'▼':'◆', `mvs-arrow ${vcls}`);
+  setEl('mvs-label', bull?'▲ BULLISH — BET YES':bear?'▼ BEARISH — BET NO':'◆ NEUTRAL — SKIP', `mvs-label ${vcls}`);
+  document.getElementById('mvs-conf').textContent=`${conf}% confidence · ${Math.max(bulls,bears)}/${total} signals`;
+}
+
+function setEl(id,text,cls){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=text;
+  if(cls) el.className=cls;
+}
+
+// ══════════════════════════════════════════
+// BET LOGGER
+// ══════════════════════════════════════════
+function logBet(dir,outcome){
+  const size  =parseFloat(document.getElementById('bet-size').value)||25;
+  const profit=outcome==='WIN'?parseFloat((size*0.9).toFixed(2)):0;
+  const now   =new Date();
+  const entry ={time:now.toTimeString().slice(0,5),dir,outcome,size,profit};
+  S.history.unshift(entry);
+  localStorage.setItem('kd2_hist',JSON.stringify(S.history.slice(0,500)));
+  S.bets++;
+  if(outcome==='WIN'){S.wins++;S.pnl+=profit;S.winAmts.push(profit);}
+  else{S.losses++;S.pnl-=size;S.lossAmts.push(size);}
+  updateKPIs();
+  renderHistory();
+
+  // on mobile, quick visual flash feedback
+  if(window.innerWidth<=768){
+    const btn=event?.currentTarget;
+    if(btn){btn.style.opacity='0.5';setTimeout(()=>btn.style.opacity='',200);}
+  }
+}
+
+function updateKPIs(){
+  const pnlEl=document.getElementById('kpi-pnl');
+  const pnlC =document.getElementById('kpi-pnl-card');
+  const pos=S.pnl>=0, neg=S.pnl<0;
+  pnlEl.textContent=(pos?'+$':'-$')+Math.abs(S.pnl).toFixed(2);
+  pnlEl.className='kpi-val mono '+(pos&&S.bets?'green':neg?'red':'');
+  pnlC.className ='kpi-card '+(pos&&S.bets?'green':neg?'red':'');
+  document.getElementById('kpi-pnl-sub').textContent=S.bets?`${S.bets} bets placed`:'No trades yet';
+
+  const wr=S.bets?Math.round(S.wins/S.bets*100):null;
+  const wrEl=document.getElementById('kpi-wr');
+  wrEl.textContent=wr!=null?wr+'%':'—';
+  wrEl.className='kpi-val mono '+(wr>55?'green':wr!=null&&wr<45?'red':'');
+  document.getElementById('kpi-wr-sub').textContent=`${S.wins} wins · ${S.losses} losses`;
+  document.getElementById('kpi-bets').textContent=S.bets;
+  document.getElementById('kpi-bets-sub').textContent=S.bets?`${S.losses} losses this session`:'Session started';
+
+  const avgW=S.winAmts.length?S.winAmts.reduce((a,b)=>a+b,0)/S.winAmts.length:0;
+  const avgL=S.lossAmts.length?S.lossAmts.reduce((a,b)=>a+b,0)/S.lossAmts.length:0;
+  document.getElementById('kpi-avgw').textContent='$'+avgW.toFixed(2);
+  document.getElementById('kpi-avgl').textContent='$'+avgL.toFixed(2);
+
+  // sidebar
+  const sb=document.getElementById('sb-pnl');
+  if(sb){sb.textContent=(S.pnl>=0?'+$':'-$')+Math.abs(S.pnl).toFixed(2);sb.style.color=pos&&S.bets?'var(--green)':neg?'var(--red)':'var(--text-3)';}
+  const sw=document.getElementById('sb-wr'); if(sw) sw.textContent=wr!=null?wr+'%':'—';
+  const sbe=document.getElementById('sb-bets'); if(sbe) sbe.textContent=S.bets;
+}
+
+function renderHistory(){
+  const body=document.getElementById('hist-body');
+  if(!S.history.length){body.innerHTML='<div class="hist-empty">No bets logged yet</div>';return;}
+  body.innerHTML=S.history.slice(0,80).map(h=>{
+    const w=h.outcome==='WIN';
+    return `<div class="h-row">
+      <div class="h-dot" style="background:${w?'var(--green)':'var(--red)'}"></div>
+      <span class="h-time">${h.time}</span>
+      <span class="h-badge ${h.dir.toLowerCase()}">${h.dir==='BULL'?'▲':'▼'} ${h.dir}</span>
+      <span class="h-out">${h.outcome}</span>
+      <span class="h-amt ${w?'pos':'neg'}">${w?'+$'+h.profit.toFixed(2):'-$'+h.size.toFixed(2)}</span>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory(){
+  if(!confirm('Reset all bet history and P&L?'))return;
+  S.history=[];S.pnl=S.bets=S.wins=S.losses=0;S.winAmts=[];S.lossAmts=[];
+  localStorage.removeItem('kd2_hist');
+  updateKPIs();renderHistory();
+}
+
+// ── RESPONSIVE: show/hide mobile sig cards vs table ──
+function applyLayout(){
+  const mob = window.innerWidth<=768;
+  const msl = document.getElementById('sig-mob-list');
+  const stw = document.querySelector('.sig-table-wrap');
+  if(msl) msl.style.display = mob?'flex':'none';
+  if(stw) stw.style.display = mob?'none':'block';
+}
+window.addEventListener('resize', applyLayout);
+applyLayout();
+
+// ══════════════════════════════════════════
+// BACKEND + KALSHI LIVE DATA
+// ══════════════════════════════════════════
+let BACKEND_URL = window.location.origin; // auto-detects Railway URL
+let backendConnected = false;
+
+// restore saved URL into input
+if (BACKEND_URL) {
+  const inp = document.getElementById('backend-url');
+  if (inp) inp.value = BACKEND_URL;
+}
+
+async function connectBackend() {
+  const raw = (document.getElementById('backend-url').value || '').trim().replace(/\/$/, '');
+  if (!raw) { setApiStatus(false,'Enter your Railway/Render URL first'); return; }
+  BACKEND_URL = raw;
+  localStorage.setItem('kd2_backend', BACKEND_URL);
+  setApiStatus(null, 'CONNECTING…');
+  try {
+    const r = await fetch(`${BACKEND_URL}/health`, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    if (!d.key_set) throw new Error('Key not set — add KALSHI_KEY_ID env var on Railway');
+    backendConnected = true;
+    setApiStatus(true, d.demo_mode ? 'CONNECTED · DEMO' : 'CONNECTED · LIVE');
+    fetchKalshiMarkets(); fetchBalance(); fetchPositions();
+  } catch(e) {
+    backendConnected = false;
+    setApiStatus(false, e.message.slice(0,55));
+  }
+}
+
+function setApiStatus(ok, txt) {
+  const dot = document.getElementById('api-dot');
+  const lbl = document.getElementById('api-status-txt');
+  if (ok === true)  { dot.style.cssText='background:var(--green);box-shadow:0 0 0 0 var(--green-glow);animation:pulse-dot 2s infinite'; }
+  if (ok === false) { dot.style.cssText='background:var(--red);animation:none'; }
+  if (ok === null)  { dot.style.cssText='background:var(--amber);animation:none'; }
+  if (lbl) lbl.textContent = txt;
+}
+
+async function fetchKalshiMarkets() {
+  if (!backendConnected) return;
+  try {
+    const d = await (await fetch(`${BACKEND_URL}/api/btc-markets`)).json();
+    const mkts = (d.markets||[]).sort((a,b)=>new Date(a.expiration_time)-new Date(b.expiration_time));
+    if (!mkts.length) return;
+    const m = mkts[0];
+    const fmt = v => v!=null ? `¢${v}` : '—';
+    const exp = m.expiration_time
+      ? new Date(m.expiration_time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+      : '—';
+    setEl('mkt-ticker', m.ticker||'—');
+    setEl('mkt-exp', `Expires ${exp}`);
+    setEl('mkt-yes', `${fmt(m.yes_bid)} / ${fmt(m.yes_ask)}`);
+    setEl('mkt-no',  `${fmt(m.no_bid)} / ${fmt(m.no_ask)}`);
+    setEl('mkt-vol', m.volume!=null ? m.volume.toLocaleString() : '—');
+    setEl('mkt-oi',  m.open_interest!=null ? m.open_interest.toLocaleString() : '—');
+    document.querySelectorAll('.bet-link').forEach(a => {
+      a.href = `https://kalshi.com/markets/${m.ticker}`;
+    });
+  } catch(e) { console.warn('Markets:', e.message); }
+}
+
+async function fetchBalance() {
+  if (!backendConnected) return;
+  try {
+    const d = await (await fetch(`${BACKEND_URL}/api/balance`)).json();
+    const cents = d.balance ?? d.available_balance ?? null;
+    setEl('bal-amount', cents!=null ? '$'+(cents/100).toFixed(2) : '$—');
+    setEl('bal-mode',   d.currency ? d.currency.toUpperCase() : 'USD');
+    setEl('bal-refresh', new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+  } catch(e) { console.warn('Balance:', e.message); }
+}
+
+async function fetchPositions() {
+  if (!backendConnected) return;
+  try {
+    const d = await (await fetch(`${BACKEND_URL}/api/positions`)).json();
+    const pos = d.market_positions || d.positions || [];
+    setEl('bal-positions', pos.length);
+  } catch(e) { setEl('bal-positions','—'); }
+}
+
+setInterval(()=>{ if(!backendConnected) return; fetchKalshiMarkets(); fetchBalance(); fetchPositions(); }, 30000);
+
+// ── INIT ──
+fetchPrice();
+fetchCandles();
+setInterval(fetchPrice,8000);
+setInterval(fetchCandles,90000);
+setTimeout(connectBackend, 1200);
+</script>
+</body>
+</html>
